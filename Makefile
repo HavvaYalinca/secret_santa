@@ -1,5 +1,5 @@
 run_dash:
-	pythnon app.py
+	python app.py
 
 run_ngrok:
 	~/ngrok http 8050

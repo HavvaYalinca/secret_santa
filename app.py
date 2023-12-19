@@ -29,14 +29,17 @@ part_1 = html.Div(
                 ),
             ]
         ),
+        html.Br(),
         html.Div(
             dbc.Button("Shuffle!", id="shuffle_button", n_clicks=0),
             className="d-grid gap-2",
         ),
+        html.Br(),
         html.Div(
             html.Img(id="shuffle_gif", src=None, style={"width": "50%"}),
             style={"textAlign": "center"},
         ),
+        html.Br(),
     ]
 )
 part_2 = html.Div(
@@ -90,8 +93,12 @@ app.layout = dbc.Col(
 )
 def show_shuffling_gif(n_clicks, seed):
     if n_clicks:
+        # enable multiple shuffles before submitting.
+        participant_order = participants.copy()
         Random(seed).shuffle(participant_order)
-        return "https://media.giphy.com/media/bG5rDPx76wHMZtsXmr/giphy.gif", {
+
+        # return "https://media.giphy.com/media/bG5rDPx76wHMZtsXmr/giphy.gif", {
+        return "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/8fa8ecca-4d4c-44fe-8838-f02e441f01e7/d2lgwob-0bf734e2-cc5f-4d97-b01a-dfb8ef9267bc.gif?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiJcL2ZcLzhmYThlY2NhLTRkNGMtNDRmZS04ODM4LWYwMmU0NDFmMDFlN1wvZDJsZ3dvYi0wYmY3MzRlMi1jYzVmLTRkOTctYjAxYS1kZmI4ZWY5MjY3YmMuZ2lmIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.GTLSa-igQv-gaFfcFd3bSxUHzIEkJFL5mCy-KdvfV8E", {
             "display": "block"
         }
     else:

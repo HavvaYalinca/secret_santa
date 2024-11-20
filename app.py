@@ -5,14 +5,31 @@ import dash_bootstrap_components as dbc
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.SKETCHY])
 
-participants = ["A", "B", "G", "H", "O"]
-participant_order = participants.copy()
+visible_participants = ["A", "G", "H", "O"]
+participant_order = ["A", 'C', 'Gö', "G", "H", "O"]
+avoid_for_surprise = {"O": ['C', 'Gö']}
 
 
 def get_target_for_person(participants, buyer):
     b_index = participants.index(buyer)
     return participants[(b_index + 1) % len(participants)]
 
+
+def surprise_proof_order(participant_order, avoid_dict, seed):
+    for buyer, buyees_to_avoid in avoid_dict.items():
+        buyer_id = participant_order.index(buyer)
+        buyee_ids = [participant_order.index(X) for X in buyees_to_avoid]
+
+        # +1 gives target, modulus takes care of edge case
+        while (buyer_id + 1) % len(participant_order) in buyee_ids:
+            Random(seed).shuffle(participant_order)
+            # Update ids after shuffling
+            buyer_id = participant_order.index(buyer)
+            buyee_ids = [participant_order.index(X) for X in buyees_to_avoid]
+
+    print("Final: ", participant_order)
+    
+    return participant_order
 
 # ----------------------------------------------------
 
@@ -23,7 +40,7 @@ part_1 = html.Div(
         # html.H6('Enter names of the participants'),
         dbc.Row(
             [
-                dbc.Col(html.P("Participants: " + ", ".join(participants))),
+                dbc.Col(html.P("Participants: " + ", ".join(visible_participants))),
                 dbc.Col(
                     dbc.Input(id="seed", placeholder="Random number", type="number")
                 ),
@@ -36,7 +53,7 @@ part_1 = html.Div(
         ),
         html.Br(),
         html.Div(
-            html.Img(id="shuffle_gif", src=None, style={"width": "50%"}),
+            html.Img(id="shuffle_gif", src=None, style={"width": "80%"}),
             style={"textAlign": "center"},
         ),
         html.Br(),
@@ -52,7 +69,7 @@ part_2 = html.Div(
                 dbc.Col(
                     dcc.Dropdown(
                         id="person_dropdown",
-                        options=participants,
+                        options=visible_participants,
                         placeholder="Choose your name",
                         disabled=False,
                     ),
@@ -94,11 +111,18 @@ app.layout = dbc.Col(
 def show_shuffling_gif(n_clicks, seed):
     if n_clicks:
         # enable multiple shuffles before submitting.
-        participant_order = participants.copy()
+        global participant_order
         Random(seed).shuffle(participant_order)
+        # Make sure not to ruin the surprise
+        participant_order = surprise_proof_order(
+            participant_order=participant_order,
+            avoid_dict=avoid_for_surprise,
+            seed=seed
+        )
 
         # return "https://media.giphy.com/media/bG5rDPx76wHMZtsXmr/giphy.gif", {
-        return "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/8fa8ecca-4d4c-44fe-8838-f02e441f01e7/d2lgwob-0bf734e2-cc5f-4d97-b01a-dfb8ef9267bc.gif?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiJcL2ZcLzhmYThlY2NhLTRkNGMtNDRmZS04ODM4LWYwMmU0NDFmMDFlN1wvZDJsZ3dvYi0wYmY3MzRlMi1jYzVmLTRkOTctYjAxYS1kZmI4ZWY5MjY3YmMuZ2lmIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.GTLSa-igQv-gaFfcFd3bSxUHzIEkJFL5mCy-KdvfV8E", {
+        # return "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/8fa8ecca-4d4c-44fe-8838-f02e441f01e7/d2lgwob-0bf734e2-cc5f-4d97-b01a-dfb8ef9267bc.gif?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiJcL2ZcLzhmYThlY2NhLTRkNGMtNDRmZS04ODM4LWYwMmU0NDFmMDFlN1wvZDJsZ3dvYi0wYmY3MzRlMi1jYzVmLTRkOTctYjAxYS1kZmI4ZWY5MjY3YmMuZ2lmIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.GTLSa-igQv-gaFfcFd3bSxUHzIEkJFL5mCy-KdvfV8E", {
+        return "https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExZ2NnejZvaWF0czJudDZwdm8xNGgxbnBmMW42dzRtaW4waGo4OGp0aiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/WrscggGmRDGHS4WACb/giphy.gif", {
             "display": "block"
         }
     else:
